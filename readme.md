@@ -2,6 +2,9 @@
 
 This project provides a graphical user interface for the MQ2AutoBuff plugin, which is part of the MacroQuest suite. Implemented in Lua and utilizing the ImGui library, this GUI simplifies the management and configuration of the MQ2AutoBuff plugin through an easy-to-use interface.
 
+<img src="https://i.imgur.com/wFxNSRK.png">
+<img src="https://i.imgur.com/TtnCi7A.png">
+
 ## Features
 
 - **Intuitive Graphical Interface**: Allows easy access to all features of the MQ2AutoBuff plugin through ImGui.
@@ -12,6 +15,8 @@ This project provides a graphical user interface for the MQ2AutoBuff plugin, whi
 - **Show ini [MQ2AutoBuff] part**: Show [MQ2AutoBuff] part in ini file in real time.
 - **Edit ini [MQ2AutoBuff] part**: Easily edit [MQ2AutoBuff] part in ini file in real time.
 
+<img src="https://i.imgur.com/yBltDSq.png">
+<img src="https://i.imgur.com/U0uxU3o.png">
 
 ## Installation
 
@@ -19,7 +24,6 @@ To install the GUIAutoBuff for MQ2AutoBuff:
 
 1. Place the GUIAutoBuff files into the appropriate MacroQuest `Lua` directory.
 2. Load the GUI from the Lua interface
-
 
 ## Usage
 
@@ -44,8 +48,8 @@ The GUI interacts with configuration settings stored in an INI file, which is na
 
 Feel free to contribute to the development of GUIAutoBuff by submitting pull requests or reporting bugs and feature requests through the GitHub project page.
 
-
 ## Use code
+
 I have included detailed comments throughout the code to assist new users in easily navigating and modifying it according to their needs. Feel free to utilize this code as a base for your own projects. This project was initially a test to explore Lua's capabilities and experiment with various programming approaches. It serves as a practical example of what can be achieved and how different methods can be applied in a real-world application.
 
 ## License
