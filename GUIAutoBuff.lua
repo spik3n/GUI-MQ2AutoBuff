@@ -1,6 +1,4 @@
----@type Mq
 local mq = require('mq')
----@type ImGui
 local imgui = require 'ImGui'
 
 -- Variables
@@ -133,20 +131,6 @@ local function handlePluginCommand(command, requiresTextField, ...)
             return
         end
 
-        -- -- Load existing settings
-        -- local settings = loadSettings({})
-        -- local nextIndex = 1
-        -- while settings["Keys"..nextIndex] do
-        --     nextIndex = nextIndex + 1
-        -- end
-
-        -- -- Update settings with the new entries
-        -- settings["Keys"..nextIndex] = buffKeyword
-        -- if not command == "/tb" then  -- Only set name for non-target commands
-        --     settings["Name"..nextIndex] = name
-        -- end
-        -- saveSettings(settings)
-
         local fullCommand = string.format(command, ...)
         mq.cmdf(fullCommand)
     else
@@ -168,87 +152,58 @@ end
 
 local function drawAddBuffSection()
     imgui.SetCursorPosY(imgui.GetCursorPosY() - 255)
-    imgui.SetCursorPosX(imgui.GetWindowWidth() - 247)
-    imgui.BeginGroup()
+    imgui.SetCursorPosX(imgui.GetWindowWidth() - 207)
+    imgui.BeginChild("AddBuffChild", 200, 250, true)
 
-    local indexKey = "Index"
-    local keysKey = "Keys"
-    local nameKey = "Name"
-    local typeKey = "Type"
+    imgui.Text("Add Buff Section")
+    imgui.Separator()
 
-    -- Initialize the index and load settings if not already done
-    textFieldValues[indexKey] = textFieldValues[indexKey] or 1
+    local index = textFieldValues[indexKey] or 1
     local settings = loadSettings()
-    while settings[keysKey .. textFieldValues[indexKey]] do
-        textFieldValues[indexKey] = textFieldValues[indexKey] + 1
+    while settings["Keys" .. index] do
+        index = index + 1
     end
+    textFieldValues[indexKey] = index
 
-    -- Text fields for data input
-    imgui.Text(keysKey .. textFieldValues[indexKey])
-    imgui.SameLine()
-    imgui.PushItemWidth(190)
-    textFieldValues[keysKey .. textFieldValues[indexKey]] = imgui.InputText("##" .. keysKey .. textFieldValues[indexKey], textFieldValues[keysKey .. textFieldValues[indexKey]] or "")
-    imgui.PopItemWidth()
+    imgui.Text("Index: " .. tostring(index)) 
 
-    imgui.SetCursorPosX(imgui.GetWindowWidth() - 254)
-    imgui.Text(nameKey .. textFieldValues[indexKey])
-    imgui.SameLine()
-    imgui.PushItemWidth(190)
-    textFieldValues[nameKey .. textFieldValues[indexKey]] = imgui.InputText("##" .. nameKey .. textFieldValues[indexKey], textFieldValues[nameKey .. textFieldValues[indexKey]] or "")
-    imgui.PopItemWidth()
+    imgui.Text("Keys")
+    textFieldValues["Keys" .. index] = imgui.InputText("##keys" .. index, textFieldValues["Keys" .. index] or "", 64)
 
-    imgui.Text(typeKey .. textFieldValues[indexKey])
-    imgui.SameLine()
-    imgui.PushItemWidth(190)
-    textFieldValues[typeKey .. textFieldValues[indexKey]] = imgui.InputText("##" .. typeKey .. textFieldValues[indexKey], textFieldValues[typeKey .. textFieldValues[indexKey]] or "")
-    imgui.PopItemWidth()
+    imgui.Text("Name")
+    textFieldValues["Name" .. index] = imgui.InputText("##name" .. index, textFieldValues["Name" .. index] or "", 64)
 
-    imgui.SetCursorPosX(imgui.GetWindowWidth() - 165)
+    imgui.Text("Type")
+    textFieldValues["Type" .. index] = imgui.InputText("##type" .. index, textFieldValues["Type" .. index] or "", 64)
 
-    -- Check if any text field is not empty
-    local anyFieldNotEmpty = false
-    for i = 1, textFieldValues[indexKey] - 1 do
-        if textFieldValues[keysKey .. i] ~= "" or textFieldValues[nameKey .. i] ~= "" or textFieldValues[typeKey .. i] ~= "" then
-            anyFieldNotEmpty = true
-            break
-        end
-    end
-
-    -- Show the "Add" button only if any field is not empty
+    local anyFieldNotEmpty = textFieldValues["Keys" .. index] ~= "" or textFieldValues["Name" .. index] ~= "" or textFieldValues["Type" .. index] ~= ""
     if anyFieldNotEmpty then
-        if imgui.Button("Add", 120, 20) then
-            imgui.OpenPopup("Confirmation") -- Open the confirmation popup when the "Add" button is clicked
+        if imgui.Button("Add Buff##add", 120, 20) then
+            imgui.OpenPopup("Confirmation")
         end
     end
 
-    -- Popup Modal for Confirmation
     if imgui.BeginPopupModal("Confirmation", nil, ImGuiWindowFlags.AlwaysAutoResize) then
         imgui.Text("Are you sure you want to add these entries?")
-        if imgui.Button("Yes") then
-            for i = 1, textFieldValues[indexKey] - 1 do
-                if textFieldValues[keysKey .. i] ~= "" or textFieldValues[nameKey .. i] ~= "" or textFieldValues[typeKey .. i] ~= "" then
-                    settings[keysKey .. i] = textFieldValues[keysKey .. i]
-                    settings[nameKey .. i] = textFieldValues[nameKey .. i]
-                    settings[typeKey .. i] = textFieldValues[typeKey .. i]
-                end
-            end
+        if imgui.Button("Yes##ConfirmAdd") then
+            settings["Keys" .. index] = textFieldValues["Keys" .. index]
+            settings["Name" .. index] = textFieldValues["Name" .. index]
+            settings["Type" .. index] = textFieldValues["Type" .. index]
             saveSettings(settings)
-            for i = 1, textFieldValues[indexKey] - 1 do
-                textFieldValues[keysKey .. i] = ""
-                textFieldValues[nameKey .. i] = ""
-                textFieldValues[typeKey .. i] = ""
-            end
-            textFieldValues[indexKey] = 1
+            textFieldValues["Keys" .. index] = ""
+            textFieldValues["Name" .. index] = ""
+            textFieldValues["Type" .. index] = ""
+            textFieldValues[indexKey] = nil
             imgui.CloseCurrentPopup()
         end
         imgui.SameLine()
-        if imgui.Button("No") then
+        if imgui.Button("No##CancelAdd") then
             imgui.CloseCurrentPopup()
         end
         imgui.EndPopup()
     end
 
-    imgui.EndGroup()
+    imgui.EndChild()
 end
 
 function GUIAutoBuff(open)
@@ -445,7 +400,7 @@ function GUIAutoBuff(open)
         imgui.Begin("Help Commands", showHelp, ImGuiWindowFlags.NoResize)
         imgui.Text("/ab will pause/restart processing of the buff queue & buff requests.")
         imgui.Text("/db <name> <buff keyword> will add a buff to the queue for <name>.")
-        imgui.Text("/tb <buff keyword> will add a buff to the queue for your target.")
+        imgui.Text("/tb <buff keyword) will add a buff to the queue for your target.")
         imgui.Text("/dq lists buffs in the queue.")
         imgui.Text("/cq clears the buff queue.")
         imgui.Text("/abd turns debugging messages on or off.")
