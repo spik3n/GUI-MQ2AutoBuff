@@ -33,7 +33,7 @@ local pluginCommands = {
 
 -- Function to dynamically generate the configuration file path
 local function getConfigFilePath()
-    local serverName = mq.TLO.MacroQuest.Server
+    local serverName = mq.TLO.MacroQuest.Server()
     local charName = mq.TLO.Me.Name()
     return string.format("%s/%s_%s.ini", mq.configDir, serverName, charName)
 end
